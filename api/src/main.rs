@@ -15,7 +15,7 @@ fn get_website(Path(name): Path<String>) -> String {
 
 #[handler] 
 fn create_website(Json(data) : Json<CreateWebsiteInput>) -> Json<CreateWebsiteOutput> {
-    let url = data.url;
+    let website = data.url;
 
     let response = CreateWebsiteOutput{
         id: String::from("ID")
@@ -24,10 +24,9 @@ fn create_website(Json(data) : Json<CreateWebsiteInput>) -> Json<CreateWebsiteOu
     Json(response)
 }
 
-#[tokio::main(flavor = "multi_thread")]
+#[tokio::main]
 
 async fn main() -> Result<(), std::io::Error> {
-
 
     let app = Route::new().at("/website/:website_id", get(get_website)).
     at("/website", post(create_website));
