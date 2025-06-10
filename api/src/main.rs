@@ -1,5 +1,5 @@
 use poem::{
-    get, post, handler, listener::TcpListener, middleware::Tracing, web::{Json,Path}, EndpointExt, Route, Server,
+    get, post, handler, listener::TcpListener, web::{Json,Path}, Route, Server,
 };
 
 pub mod request_inputs;
@@ -7,7 +7,7 @@ pub mod request_outputs;
 
 use crate::request_inputs::CreateWebsiteInput;
 use crate::request_outputs::CreateWebsiteOutput;
-
+use store::Store;
 #[handler]
 fn get_website(Path(name): Path<String>) -> String {
     format!("hello: {name}")
@@ -15,10 +15,11 @@ fn get_website(Path(name): Path<String>) -> String {
 
 #[handler] 
 fn create_website(Json(data) : Json<CreateWebsiteInput>) -> Json<CreateWebsiteOutput> {
-    let website = data.url;
 
+    let s = Store();
+    let id = s.create_website();
     let response = CreateWebsiteOutput{
-        id: String::from("ID")
+        id
     };
 
     Json(response)
@@ -28,8 +29,9 @@ fn create_website(Json(data) : Json<CreateWebsiteInput>) -> Json<CreateWebsiteOu
 
 async fn main() -> Result<(), std::io::Error> {
 
-    let app = Route::new().at("/website/:website_id", get(get_website)).
-    at("/website", post(create_website));
+    let app = Route::new()
+    .at("/website/:website_id", get(get_website))
+    .at("/website", post(create_website));
     Server::new(TcpListener::bind("0.0.0.0:3000"))
         .name("hello-world")
         .run(app)
